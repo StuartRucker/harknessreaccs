@@ -32,19 +32,58 @@
     user-scalable=no, initial-scale=1, maximum-scale=1, user-scalable=0" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+ <!-- <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,700|Open+Sans:400,300,600"> -->
+<link id = "stylesheet" rel="stylesheet" href="style.css">
 
-<style type="text/css">
-body { margin: 0; padding: 0; background: #000;}
-canvas { display: block; margin: 0 auto; background: #fff; }
-</style>
+<!-- <style type="text/css">
+
+</style> -->
 
 </head>
 
 <body>
+
+  <div class="login">
+    <div class="login-triangle"></div>
+
+    <h2 class="login-header">Harkness Reaccs only</h2>
+
+    <form  class="login-container">
+      <p><input id = "name" type="text" placeholder="name"></p>
+      <p><input onclick="startgame();" type="submit" value="Go"></p>
+    </form>
+  </div>
+
 <img id="banner" src="banner.png" style="display:none;width:100%">
-<canvas></canvas>
+<canvas id = "gamecanvas" style = "display:none;"></canvas>
 <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script
+  src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+  integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+  crossorigin="anonymous"></script>
 <script src="/socket.io/socket.io.js"></script>
+<script>
+var myname = "noname";
+function startgame(){
+  var name = $("#name").val();
+  if(String(name).length < 1){
+    $( ".login" ).effect( "shake" );
+    return false;
+  }
+
+  $("#stylesheet").attr("href","gamestyle.css");
+  $(".login").hide();
+  $("#gamecanvas").show(0,function(){
+    setTimeout(POP.resize,100);
+  });
+
+
+
+  myname = name
+
+
+}
+</script>
 <script src="/main.js"></script>
 
 
