@@ -1,25 +1,20 @@
 
-# Socket.IO Chat
+# App that allows Exonians to live react during harkness
 
-A simple chat demo for socket.io
+After entering their name, they are put in a socket.io where they can live react to comments other exonians are makign with one of three reactions:
+"Yes, And..."
+"Yes, But..."
+"Tangent."
 
-## How to use
+![alt text]()
+
+## How to setup
 
 ```
-$ cd socket.io
-$ npm install
-$ cd examples/chat
+$ cd harknessreaccs
 $ npm install
 $ npm start
 ```
 
-And point your browser to `http://localhost:3000`. Optionally, specify
+And point your browser to `http://localhost:8000`. Optionally, specify
 a port by supplying the `PORT` env variable.
-
-## Features
-
-- Multiple users can join a chat room by each entering a unique username
-on website load.
-- Users can type chat messages to the chat room.
-- A notification is sent to all users when a user joins or leaves
-the chatroom.
