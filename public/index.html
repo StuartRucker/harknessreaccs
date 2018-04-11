@@ -42,19 +42,28 @@
 </head>
 
 <body>
+  <div id = "tohide">
+  
+  <img id = "ufo-image" src = "res/ufo.png">
 
   <div class="login">
-    <div class="login-triangle"></div>
 
-    <h2 class="login-header">Harkness Reaccs only</h2>
+
 
     <form class="login-container">
       <p><input id = "name" type="text" placeholder="name"></p>
-      <p><input type="submit" value="Go"></p>
+      <p style = "padding-left:110px;padding-right:110px;"><input type="submit" value="Go"></p>
     </form>
   </div>
+</div>
 
-<img id="banner" src="banner.png" style="display:none;width:100%">
+<img id="banner" src="res/banner.png" style="display:none;width:100%">
+
+<img id="hmm" src="res/hmm.png" style="display:none;">
+<img id="agree" src="res/agree.png" style="display:none;">
+<img id="tangent" src="res/tangent.png" style="display:none;">
+
+<img id="background" src="res/background.gif" style="display:none;width:100%">
 <canvas id = "gamecanvas" style = "display:none;"></canvas>
 
 <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
@@ -70,13 +79,13 @@ var myname = "noname";
 $(".login-container").submit(function(e) {
     e.preventDefault();
     var name = $("#name").val();
-    
+
     if(String(name).length < 1){
       $( ".login" ).effect( "shake" );
       return false;
     }else{
       $("#stylesheet").attr("href","gamestyle.css");
-      $(".login").hide();
+      $("#tohide").hide();
 
       $("#gamecanvas").show();
       initializeWindows();

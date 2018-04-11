@@ -11,20 +11,21 @@ function initializeWindows(){
       // the event object has an array
       // called touches, we just want
       // the first touch
-      POP.slider.touchdown(e.touches[0]);
+
       POP.Input.set(e.touches[0]);
+      POP.banner.touchdown(e.touches[0]);
   }, false);
   window.addEventListener('touchmove', function(e) {
       // we're not interested in this
       // but prevent default behaviour
       // so the screen doesn't scroll
       // or zoom
-      POP.slider.touchmove(e.touches[0]);
+      POP.banner.touchmove(e.touches[0]);
       e.preventDefault();
   }, false);
   window.addEventListener('touchend', function(e) {
       // as above
-      POP.slider.touchend(e.touches[0]);
+      POP.banner.touchend(e.touches[0]);
       e.preventDefault();
   }, false);
   //for mice
@@ -33,7 +34,7 @@ function initializeWindows(){
       // the event object has an array
       // called touches, we just want
       // the first touch
-      POP.slider.touchdown(e);
+      POP.banner.touchdown(e);
 
   }, false);
   window.addEventListener('mousemove', function(e) {
@@ -41,12 +42,12 @@ function initializeWindows(){
       // but prevent default behaviour
       // so the screen doesn't scroll
       // or zoom
-      POP.slider.touchmove(e);
+      POP.banner.touchmove(e);
       e.preventDefault();
   }, false);
   window.addEventListener('mouseup', function(e) {
       // as above
-      POP.slider.touchend(e);
+      POP.banner.touchend(e);
       e.preventDefault();
   }, false);
 }
@@ -118,7 +119,7 @@ function initializeWindows(){
             POP.canvas = document.getElementsByTagName('canvas')[0];
 
             POP.banner = new POP.Banner();
-            POP.slider = new POP.Slider();
+
             // it's important to set this
             // otherwise the browser will
             // default to 320x200
@@ -241,7 +242,7 @@ function initializeWindows(){
             }
 
             POP.banner.update();
-            POP.slider.update();
+
 
 
             // update wave offset
@@ -266,9 +267,9 @@ function initializeWindows(){
 
 
 
-            POP.Draw.rect(0, 0, POP.WIDTH, POP.HEIGHT, '#C8DFC4');
+            POP.Draw.image("background", 0, 0, POP.WIDTH, POP.HEIGHT)
             POP.banner.render();
-            POP.slider.render();
+
 
 
             for (i = 0; i < POP.entities.length; i += 1) {
@@ -344,13 +345,33 @@ function initializeWindows(){
 
 
         text: function(string, x, y, size, col) {
-            POP.ctx.font = 'bold ' + size + 'px Monospace';
+            POP.ctx.font = 'bold ' + size + 'px Futura';
             POP.ctx.fillStyle = col;
             POP.ctx.fillText(string, x, y);
+        },
+        textUnderImage: function(imageid, string, x, y, size, col){
+          POP.ctx.font = 'bold ' + size + 'px Futura';
+          POP.ctx.fillStyle = col;
+          POP.ctx.textAlign = 'center';
+
+          var image = document.getElementById(imageid)
+          realy = y + 70*image.height/image.width+size ;
+          realx = x;
+          if(imageid == "tangent"){
+            realx = realx -6 ;
+          }
+          POP.ctx.fillText(string, realx, realy);
+
+          POP.ctx.textAlign = 'left';
         },
 
         image: function(id, dx, dy, dWidth, dHeight) {
             var image = document.getElementById(id);
+            POP.ctx.drawImage(image, dx, dy, dWidth, dHeight);
+        },
+        imageInferHeight: function(id, dx, dy, dWidth) {
+            var image = document.getElementById(id);
+            dHeight = dWidth*image.height/image.width
             POP.ctx.drawImage(image, dx, dy, dWidth, dHeight);
         }
 
@@ -399,9 +420,11 @@ function initializeWindows(){
     };
 
     POP.Bubble = function(data) {
-        this.color = data.color;
+        this.type = data.type;
+        this.images = ["hmm","tangent","agree"]
+
         this.name = data.name;
-        this.type = 'bubble';
+
         this.r = 20;
         this.speed = 2;
 
@@ -418,7 +441,9 @@ function initializeWindows(){
 
         this.remove = false;
 
-        this.sinoffset = Math.random() * 100;
+        this.sinoffset = Math.random() * 1000;
+
+
 
         this.update = function() {
 
@@ -438,22 +463,28 @@ function initializeWindows(){
         };
 
         this.render = function() {
+            console.log(this.type)
+            POP.Draw.imageInferHeight(this.images[this.type],this.x-70/2,this.y,70);
 
-            POP.Draw.circle(this.x, this.y, this.r, this.color);
-            POP.Draw.text(this.name, this.x, this.y, 14, '#000');
+            POP.Draw.textUnderImage(this.images[this.type],this.name, this.x,this.y, 12, '#e6e6e6');
         };
 
     };
 
     POP.Banner = function() {
 
-            this.sliderOffset = (POP.WIDTH*2/ 9)
+            this.sliderOffset = 0
 
             this.topy = POP.HEIGHT - POP.WIDTH / 3 - this.sliderOffset
             this.bottomy = POP.HEIGHT-this.sliderOffset
 
+
+            this.pressed = false;
+            this.mousex = 0
+            this.mousey = 0
+
             this.update = function() {
-                  this.sliderOffset = (POP.WIDTH*2/ 9)
+
 
                   this.topy = POP.HEIGHT - POP.WIDTH / 3 - this.sliderOffset
                   this.bottomy = POP.HEIGHT-this.sliderOffset
@@ -471,21 +502,14 @@ function initializeWindows(){
 
                         bubbledata = {
                             x: POP.Input.x,
-                            y: POP.Input.y,
+                            y: POP.Input.y-30,
                             name: myname
                         }
 
 
-                        if (POP.Input.x < POP.WIDTH / 3) {
-                            // POP.entities.push(new POP.Bubble(POP.Input.x,POP.Input.y,"rgba(255,0,0,255)"));
-                            bubbledata.color = "rgba(255,0,0,255)";
-                        } else if (POP.Input.x < 2 * POP.WIDTH / 3) {
-                            bubbledata.color = "rgba(255,255,0,255)";
-                            // POP.entities.push(new POP.Bubble(POP.Input.x,POP.Input.y,"rgba(255,255,0,255)"));
-                        } else {
-                            bubbledata.color = "rgba(0,255,0,255)";
-                            // POP.entities.push(new POP.Bubble(POP.Input.x,POP.Input.y,"rgba(0,255,0,255)"));
-                        }
+                        bubbledata.type = Math.min(Math.max(Math.floor(3*this.mousex/POP.WIDTH),0),2)
+
+
                         socket.emit("new bubble", bubbledata);
                         POP.entities.push(new POP.Bubble(bubbledata));
                         POP.Input.tapped = false;
@@ -496,115 +520,45 @@ function initializeWindows(){
                 this.render = function() {
                     POP.Draw.image("banner", 0, this.topy, POP.WIDTH, POP.WIDTH / 3)
 
+                    //make sure the right color is drawn based on where the mouse is.
+                    colors = ['#fff','#fff','#fff']
+                    if (this.pressed && this.mousey >= this.topy && this.mousey <= this.bottomy) {
+                      colors[Math.min(Math.max(Math.floor(3*this.mousex/POP.WIDTH),0),2)] = '#ffcc99'
+                      // console.log(Math.min(Math.max(Math.floor(3*this.mousex/POP.WIDTH),0),2))
+                    }
+
+                    POP.Draw.text('Yes, But...', 16, POP.HEIGHT-POP.WIDTH / 6+10, 14, colors[0]);
+                    POP.Draw.text('Tangent', POP.WIDTH/3+23, POP.HEIGHT-POP.WIDTH / 6+10, 14, colors[1]);
+                    POP.Draw.text('Yes, And...', 2*POP.WIDTH/3+16, POP.HEIGHT-POP.WIDTH / 6+10, 14, colors[2]);
+                }
+
+
+
+                this.touchdown = function(data) {
+                    this.mousex = (data.pageX - POP.offset.left) / POP.scale;
+                    this.mousey = (data.pageY - POP.offset.top) / POP.scale;
+
+
+                    this.pressed = true;
+
+                }
+
+                this.touchmove = function(data) {
+                    if(this.pressed){
+                      this.mousex = (data.pageX - POP.offset.left) / POP.scale;
+                      this.mousey = (data.pageY - POP.offset.top) / POP.scale;
+
+
+                    }
+
+                }
+
+                this.touchend = function(data) {
+
+                    this.pressed = false;
                 }
         },
 
-        POP.Slider = function(){
-          this.height = 10
-
-
-          this.coordinate = POP.banner;
-          this.sliderOffset = (POP.WIDTH*2/ 9)
-          this.selected = false;
-
-
-          this.widgetx = POP.WIDTH*6.5/10;
-          this.widgety = POP.HEIGHT-this.sliderOffset/2;
-          this.widgetr = 30;
-
-          this.lockedOn = false;
-          this.endBorder = 50;
-
-          this.averagerating = 0;
-
-          socket.on("averagerating",function(data){
-            POP.slider.setAverageRating(data);
-          });
-          this.setAverageRating = function(data){
-            this.averagerating = data;
-          };
-
-          this.guid = function() {
-            function s4() {
-              return Math.floor((1 + Math.random()) * 0x10000)
-                .toString(16)
-                .substring(1);
-            }
-            return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
-          };
-          this.id = this.guid();
-
-          this.constrainX = function(x){
-            return Math.min(Math.max(this.endBorder,x),POP.WIDTH-this.endBorder)
-          }
-
-          this.sendRating = function(){
-            rating = (this.widgetx-this.endBorder)/(POP.WIDTH-this.endBorder*2)
-            socket.emit("rating",{"id":this.id,"rating":rating});
-
-          }
-          this.touchdown = function(data) {
-              x = (data.pageX - POP.offset.left) / POP.scale;
-              y = (data.pageY - POP.offset.top) / POP.scale;
-
-              if(Math.sqrt((x-this.widgetx)*(x-this.widgetx)+(y-this.widgety)*(y-this.widgety)) < this.widgetr){
-                // console.log("down");
-                this.lockedOn = true;
-              }
-
-          }
-
-          this.touchmove = function(data) {
-              if(this.lockedOn){
-                x = (data.pageX - POP.offset.left) / POP.scale;
-                y = (data.pageY - POP.offset.top) / POP.scale;
-
-                this.widgetx = this.constrainX(x);
-              }
-
-
-              this.sendRating();
-
-          }
-
-          this.touchend = function(data) {
-              x = (data.pageX - POP.offset.left) / POP.scale;
-              y = (data.pageY - POP.offset.top) / POP.scale;
-
-              this.lockedOn = false;
-
-          }
-
-          this.update = function(){
-            this.sliderOffset = (POP.WIDTH*2/ 9)
-            this.widgety = POP.HEIGHT-this.sliderOffset/2;
-
-            if(!this.lockedOn){
-              this.widgetx -= (this.widgetx-POP.WIDTH*.65)*.001
-            }
-            if(Math.random()<.1){
-              this.sendRating();
-            }
-
-            this.sendRating();
-
-          };
-          this.render = function(){
-
-
-            rating = Math.round(10*(this.widgetx-this.endBorder)/(POP.WIDTH-this.endBorder*2))
-            POP.Draw.text('How is class going: ' + rating + '/10' , 4, POP.HEIGHT-this.sliderOffset+16, 14, '#fff');
-            POP.Draw.rect(0,POP.HEIGHT-this.sliderOffset/2-this.height/2, POP.WIDTH, this.height, '#ffffff');
-            POP.Draw.circle(this.widgetx, this.widgety, this.widgetr, "#000000");
-            console.log()
-            POP.Draw.text('Average Rating: ' + Math.round(10*this.averagerating) + "/10", 20, 30, 14, '#fff');
-          };
-
-
-
-
-
-        },
 
 
         POP.Particle = function(x, y, r, col) {
