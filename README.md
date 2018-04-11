@@ -5,8 +5,9 @@ After entering their name, they are put in a socket.io where they can live react
 "Yes, And..."
 "Yes, But..."
 "Tangent."
+![login](https://github.com/StuartRucker/harknessreaccs/blob/master/readmeimages/screenshot2.png?raw=true)
+![gameplay](https://github.com/StuartRucker/harknessreaccs/blob/master/readmeimages/screenshot1.png?raw=true)
 
-![alt text]()
 
 ## How to setup
 
