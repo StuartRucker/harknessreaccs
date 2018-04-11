@@ -1,3 +1,58 @@
+function initializeWindows(){
+  // listen for clicks
+  window.addEventListener('click', function(e) {
+      e.preventDefault();
+      POP.Input.set(e);
+  }, false);
+
+  // listen for touches
+  window.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      // the event object has an array
+      // called touches, we just want
+      // the first touch
+      POP.slider.touchdown(e.touches[0]);
+      POP.Input.set(e.touches[0]);
+  }, false);
+  window.addEventListener('touchmove', function(e) {
+      // we're not interested in this
+      // but prevent default behaviour
+      // so the screen doesn't scroll
+      // or zoom
+      POP.slider.touchmove(e.touches[0]);
+      e.preventDefault();
+  }, false);
+  window.addEventListener('touchend', function(e) {
+      // as above
+      POP.slider.touchend(e.touches[0]);
+      e.preventDefault();
+  }, false);
+  //for mice
+  window.addEventListener('mousedown', function(e) {
+      e.preventDefault();
+      // the event object has an array
+      // called touches, we just want
+      // the first touch
+      POP.slider.touchdown(e);
+
+  }, false);
+  window.addEventListener('mousemove', function(e) {
+      // we're not interested in this
+      // but prevent default behaviour
+      // so the screen doesn't scroll
+      // or zoom
+      POP.slider.touchmove(e);
+      e.preventDefault();
+  }, false);
+  window.addEventListener('mouseup', function(e) {
+      // as above
+      POP.slider.touchend(e);
+      e.preventDefault();
+  }, false);
+}
+
+
+
 
 
     var socket = io();
@@ -63,6 +118,7 @@
             POP.canvas = document.getElementsByTagName('canvas')[0];
 
             POP.banner = new POP.Banner();
+            POP.slider = new POP.Slider();
             // it's important to set this
             // otherwise the browser will
             // default to 320x200
@@ -92,31 +148,7 @@
             // cover the screen width
             POP.wave.total = Math.ceil(POP.WIDTH / POP.wave.r) + 1;
 
-            // listen for clicks
-            window.addEventListener('click', function(e) {
-                e.preventDefault();
-                POP.Input.set(e);
-            }, false);
 
-            // listen for touches
-            window.addEventListener('touchstart', function(e) {
-                e.preventDefault();
-                // the event object has an array
-                // called touches, we just want
-                // the first touch
-                POP.Input.set(e.touches[0]);
-            }, false);
-            window.addEventListener('touchmove', function(e) {
-                // we're not interested in this
-                // but prevent default behaviour
-                // so the screen doesn't scroll
-                // or zoom
-                e.preventDefault();
-            }, false);
-            window.addEventListener('touchend', function(e) {
-                // as above
-                e.preventDefault();
-            }, false);
 
             // we're ready to resize
             POP.resize();
@@ -127,7 +159,7 @@
 
 
         resize: function() {
-          console.log("resize");
+
 
             POP.currentHeight = window.innerHeight;
             // resize the width in proportion
@@ -209,6 +241,7 @@
             }
 
             POP.banner.update();
+            POP.slider.update();
 
 
             // update wave offset
@@ -235,6 +268,9 @@
 
             POP.Draw.rect(0, 0, POP.WIDTH, POP.HEIGHT, '#C8DFC4');
             POP.banner.render();
+            POP.slider.render();
+
+
             for (i = 0; i < POP.entities.length; i += 1) {
                 POP.entities[i].render();
             }
@@ -410,9 +446,19 @@
     };
 
     POP.Banner = function() {
+
+            this.sliderOffset = (POP.WIDTH*2/ 9)
+
+            this.topy = POP.HEIGHT - POP.WIDTH / 3 - this.sliderOffset
+            this.bottomy = POP.HEIGHT-this.sliderOffset
+
             this.update = function() {
+                  this.sliderOffset = (POP.WIDTH*2/ 9)
+
+                  this.topy = POP.HEIGHT - POP.WIDTH / 3 - this.sliderOffset
+                  this.bottomy = POP.HEIGHT-this.sliderOffset
                     //BANNER mechanics
-                    if (POP.Input.tapped && POP.Input.y > POP.HEIGHT - POP.WIDTH / 3) {
+                    if (POP.Input.tapped && POP.Input.y >= this.topy && POP.Input.y <= this.bottomy) {
                         for (var n = 0; n < 5; n += 1) {
                             POP.entities.push(new POP.Particle(
                                 POP.Input.x,
@@ -429,7 +475,7 @@
                             name: myname
                         }
 
-                        console.log(bubbledata)
+
                         if (POP.Input.x < POP.WIDTH / 3) {
                             // POP.entities.push(new POP.Bubble(POP.Input.x,POP.Input.y,"rgba(255,0,0,255)"));
                             bubbledata.color = "rgba(255,0,0,255)";
@@ -448,10 +494,118 @@
                 },
 
                 this.render = function() {
-                    POP.Draw.image("banner", 0, POP.HEIGHT - POP.WIDTH / 3, POP.WIDTH, POP.WIDTH / 3)
+                    POP.Draw.image("banner", 0, this.topy, POP.WIDTH, POP.WIDTH / 3)
 
                 }
         },
+
+        POP.Slider = function(){
+          this.height = 10
+
+
+          this.coordinate = POP.banner;
+          this.sliderOffset = (POP.WIDTH*2/ 9)
+          this.selected = false;
+
+
+          this.widgetx = POP.WIDTH*6.5/10;
+          this.widgety = POP.HEIGHT-this.sliderOffset/2;
+          this.widgetr = 30;
+
+          this.lockedOn = false;
+          this.endBorder = 50;
+
+          this.averagerating = 0;
+
+          socket.on("averagerating",function(data){
+            POP.slider.setAverageRating(data);
+          });
+          this.setAverageRating = function(data){
+            this.averagerating = data;
+          };
+
+          this.guid = function() {
+            function s4() {
+              return Math.floor((1 + Math.random()) * 0x10000)
+                .toString(16)
+                .substring(1);
+            }
+            return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+          };
+          this.id = this.guid();
+
+          this.constrainX = function(x){
+            return Math.min(Math.max(this.endBorder,x),POP.WIDTH-this.endBorder)
+          }
+
+          this.sendRating = function(){
+            rating = (this.widgetx-this.endBorder)/(POP.WIDTH-this.endBorder*2)
+            socket.emit("rating",{"id":this.id,"rating":rating});
+
+          }
+          this.touchdown = function(data) {
+              x = (data.pageX - POP.offset.left) / POP.scale;
+              y = (data.pageY - POP.offset.top) / POP.scale;
+
+              if(Math.sqrt((x-this.widgetx)*(x-this.widgetx)+(y-this.widgety)*(y-this.widgety)) < this.widgetr){
+                // console.log("down");
+                this.lockedOn = true;
+              }
+
+          }
+
+          this.touchmove = function(data) {
+              if(this.lockedOn){
+                x = (data.pageX - POP.offset.left) / POP.scale;
+                y = (data.pageY - POP.offset.top) / POP.scale;
+
+                this.widgetx = this.constrainX(x);
+              }
+
+
+              this.sendRating();
+
+          }
+
+          this.touchend = function(data) {
+              x = (data.pageX - POP.offset.left) / POP.scale;
+              y = (data.pageY - POP.offset.top) / POP.scale;
+
+              this.lockedOn = false;
+
+          }
+
+          this.update = function(){
+            this.sliderOffset = (POP.WIDTH*2/ 9)
+            this.widgety = POP.HEIGHT-this.sliderOffset/2;
+
+            if(!this.lockedOn){
+              this.widgetx -= (this.widgetx-POP.WIDTH*.65)*.001
+            }
+            if(Math.random()<.1){
+              this.sendRating();
+            }
+
+            this.sendRating();
+
+          };
+          this.render = function(){
+
+
+            rating = Math.round(10*(this.widgetx-this.endBorder)/(POP.WIDTH-this.endBorder*2))
+            POP.Draw.text('How is class going: ' + rating + '/10' , 4, POP.HEIGHT-this.sliderOffset+16, 14, '#fff');
+            POP.Draw.rect(0,POP.HEIGHT-this.sliderOffset/2-this.height/2, POP.WIDTH, this.height, '#ffffff');
+            POP.Draw.circle(this.widgetx, this.widgety, this.widgetr, "#000000");
+            console.log()
+            POP.Draw.text('Average Rating: ' + Math.round(10*this.averagerating) + "/10", 20, 30, 14, '#fff');
+          };
+
+
+
+
+
+        },
+
 
         POP.Particle = function(x, y, r, col) {
 
@@ -506,7 +660,7 @@
 
 
     socket.on('new bubble', function(data) {
-        console.log('new bubble')
+
         POP.entities.push(new POP.Bubble(data));
     });
 

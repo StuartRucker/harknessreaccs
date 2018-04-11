@@ -16,11 +16,30 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Chatroom
 
 var numUsers = 0;
-
+var ratings  = {}
 io.on('connection', function (socket) {
   var addedUser = false;
-
+  var id = "";
   // when the client emits 'new message', this listens and executes
+  socket.on("rating", function (data){
+    ratings[data["id"]]  = data["rating"]
+    id = data["id"];
+    var count = 0;
+    var sum = 0;
+    for (var key in ratings) {
+    // check if the property/key is defined in the object itself, not in parent
+      if (ratings.hasOwnProperty(key)) {
+          sum += ratings[key];
+          count += 1;
+        }
+    }
+    if(count == 0){
+      count = 1;
+      sum = .65;
+    }
+
+    socket.emit("averagerating", sum/count)
+  });
 
   socket.on('new bubble', function (data) {
     // we tell the client to execute 'new message'
@@ -69,14 +88,8 @@ io.on('connection', function (socket) {
 
   // when the user disconnects.. perform this
   socket.on('disconnect', function () {
-    if (addedUser) {
-      --numUsers;
-
-      // echo globally that this client has left
-      socket.broadcast.emit('user left', {
-        username: socket.username,
-        numUsers: numUsers
-      });
+    if(ratings.hasOwnProperty(id)){
+      delete ratings[id]
     }
   });
 });

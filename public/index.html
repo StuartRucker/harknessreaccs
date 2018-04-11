@@ -48,43 +48,48 @@
 
     <h2 class="login-header">Harkness Reaccs only</h2>
 
-    <form  class="login-container">
+    <form class="login-container">
       <p><input id = "name" type="text" placeholder="name"></p>
-      <p><input onclick="startgame();" type="submit" value="Go"></p>
+      <p><input type="submit" value="Go"></p>
     </form>
   </div>
 
 <img id="banner" src="banner.png" style="display:none;width:100%">
 <canvas id = "gamecanvas" style = "display:none;"></canvas>
+
 <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
 <script
   src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
   integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
   crossorigin="anonymous"></script>
 <script src="/socket.io/socket.io.js"></script>
+<script src="/main.js"></script>
 <script>
 var myname = "noname";
-function startgame(){
-  var name = $("#name").val();
-  if(String(name).length < 1){
-    $( ".login" ).effect( "shake" );
-    return false;
-  }
 
-  $("#stylesheet").attr("href","gamestyle.css");
-  $(".login").hide();
-  $("#gamecanvas").show(0,function(){
-    setTimeout(POP.resize,100);
-  });
+$(".login-container").submit(function(e) {
+    e.preventDefault();
+    var name = $("#name").val();
+    
+    if(String(name).length < 1){
+      $( ".login" ).effect( "shake" );
+      return false;
+    }else{
+      $("#stylesheet").attr("href","gamestyle.css");
+      $(".login").hide();
 
+      $("#gamecanvas").show();
+      initializeWindows();
+      setTimeout(function(){
+        POP.resize();
+      },50);
+      myname = name
+    }
+});
 
-
-  myname = name
-
-
-}
 </script>
-<script src="/main.js"></script>
+
+
 
 
 
