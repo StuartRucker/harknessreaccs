@@ -76,7 +76,7 @@ function initializeWindows(){
 
         // set up some inital values
         WIDTH: 320,
-        HEIGHT: 480,
+        HEIGHT: 700,
         scale: 1,
         // the position of the canvas
         // in relation to the screen
@@ -528,7 +528,7 @@ function initializeWindows(){
                     }
 
                     POP.Draw.text('Yes, But...', 16, POP.HEIGHT-POP.WIDTH / 6+10, 14, colors[0]);
-                    POP.Draw.text('Tangent', POP.WIDTH/3+23, POP.HEIGHT-POP.WIDTH / 6+10, 14, colors[1]);
+                    POP.Draw.text('Tangent', POP.WIDTH/3+20, POP.HEIGHT-POP.WIDTH / 6+10, 14, colors[1]);
                     POP.Draw.text('Yes, And...', 2*POP.WIDTH/3+16, POP.HEIGHT-POP.WIDTH / 6+10, 14, colors[2]);
                 }
 
