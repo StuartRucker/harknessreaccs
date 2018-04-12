@@ -21,14 +21,19 @@
 /* 'Open Sans' font from Google Fonts */
 /* @import url(https://fonts.googleapis.com/css?family=Open+Sans:400,700); */
 
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
 body {
   background-image: url("res/background.gif");
   font-family: 'Futura'
 }
 #ufo-image{
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
+  position: fixed;
+
+  left:50%;
+  margin-left:-250px;
   width: 500px;
 }
 .login {
